@@ -9,7 +9,7 @@
 		"test": "node --test",
 		"changeset": "changeset",
 		"version-packages": "changeset version",
-		"release": "changeset version && git add . && git commit -m \"chore: bump version\" && npm publish --access public"
+		"release": "npm publish --access public"
 	},
 	"bin": "./index.js",
 	"author": "",
