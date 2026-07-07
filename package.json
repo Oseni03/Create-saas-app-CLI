@@ -6,7 +6,10 @@
 	"type": "module",
 	"scripts": {
 		"start": "node index.js",
-		"test": "node --test"
+		"test": "node --test",
+		"changeset": "changeset",
+		"version-packages": "changeset version",
+		"release": "npm run test && changeset version && git add . && git commit -m \"chore: bump version\" && npm publish --access public"
 	},
 	"bin": "./index.js",
 	"author": "",
@@ -16,5 +19,8 @@
 		"execa": "^9.5.0",
 		"fs-extra": "^11.0.1",
 		"picocolors": "^1.1.1"
+	},
+	"devDependencies": {
+		"@changesets/cli": "^2.31.0"
 	}
 }
