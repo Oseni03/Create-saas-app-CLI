@@ -7,6 +7,9 @@ import fs from "fs-extra";
 import path from "path";
 import { fileURLToPath } from "url";
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 const BACKEND_REPOS = {
 	Express: "Oseni03/saas-backend-express",
 	FastAPI: "Oseni03/saas-backend-fastapi",
@@ -204,6 +207,7 @@ async function generateScaffold({
 	rootDir = process.cwd(),
 	cloneTemplate = cloneTemplateRepo,
 	validateRepo = validateTemplateRepo,
+	copyContextFiles = copyRootContextFiles,
 }) {
 	const root = path.resolve(rootDir, projectName);
 	if (fs.existsSync(root)) {
@@ -242,6 +246,14 @@ async function generateScaffold({
 	await writeRootDockerCompose(root, backend, frontend);
 	await writeRootReadme(root, backend, frontend, projectName);
 	await writeRootEnv(root, backend, frontend);
+	await copyContextFiles(root, {
+		projectName,
+		backend,
+		frontend,
+		backendPort: String(BACKEND_PORTS[backend]),
+		frontendPort: String(FRONTEND_PORTS[frontend]),
+		dbMigrateCmd: BACKEND_MIGRATE_CMD[backend],
+	});
 	configSpinner.stop("Monorepo configuration written.");
 
 	return { root };
@@ -396,6 +408,27 @@ async function writeTurboConfig(root) {
 		},
 	};
 	await fs.writeJson(path.join(root, "turbo.json"), content, { spaces: 2 });
+}
+
+async function copyRootContextFiles(root, templateVars = {}) {
+	const contextDir = path.join(__dirname, "contexts", "root");
+	await fs.copy(contextDir, root);
+
+	if (Object.keys(templateVars).length > 0) {
+		const templateFiles = ["AGENTS.md", "README.md"];
+		for (const file of templateFiles) {
+			const filePath = path.join(root, file);
+			if (!fs.existsSync(filePath)) continue;
+			let content = await fs.readFile(filePath, "utf8");
+			for (const [key, value] of Object.entries(templateVars)) {
+				content = content.replaceAll(
+					new RegExp(`\\{\\{${key}\\}\\}`, "g"),
+					value,
+				);
+			}
+			await fs.writeFile(filePath, content);
+		}
+	}
 }
 
 const isMainModule =

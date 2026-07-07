@@ -70,6 +70,36 @@ test("generateScaffold creates a minimal turborepo layout and clones templates",
 	assert.equal(cloneCalls[1].repo, "Oseni03/saas-frontend-next");
 });
 
+test("generateScaffold copies context files to project root via injected function", async () => {
+	const tempRoot = await fs.mkdtemp(
+		path.join(os.tmpdir(), "create-saas-cli-"),
+	);
+	const copyCalls = [];
+
+	await generateScaffold({
+		projectName: "demo-app",
+		backend: "FastAPI",
+		frontend: "Next",
+		rootDir: tempRoot,
+		cloneTemplate: async (repo, dest) => {
+			await fs.mkdir(dest, { recursive: true });
+			await fs.writeFile(
+				path.join(dest, "package.json"),
+				JSON.stringify({ name: dest.split("/").pop() }),
+			);
+		},
+		copyContextFiles: async (root) => {
+			copyCalls.push(root);
+		},
+	});
+
+	assert.equal(copyCalls.length, 1);
+	assert.equal(
+		copyCalls[0],
+		path.join(tempRoot, "demo-app"),
+	);
+});
+
 test("generateScaffold creates uv wrapper for FastAPI", async () => {
 	const tempRoot = await fs.mkdtemp(
 		path.join(os.tmpdir(), "create-saas-cli-"),
