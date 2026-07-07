@@ -1,6 +1,6 @@
 {
 	"name": "@oseni03/create-saas-app",
-	"version": "1.0.0",
+	"version": "1.1.0",
 	"description": "Scaffold a full-stack SaaS app: choose Express, FastAPI, or DRF backend + Next.js frontend",
 	"main": "index.js",
 	"type": "module",
