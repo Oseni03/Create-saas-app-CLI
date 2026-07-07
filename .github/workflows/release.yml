@@ -24,6 +24,14 @@ jobs:
 
             - run: npm ci
             - run: npm test
+
+            - name: Verify npm authentication
+              run: |
+                  npm whoami
+                  npm config get registry
+              env:
+                  NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
             - name: Create Release Pull Request or Publish
               uses: changesets/action@v1
               with:
